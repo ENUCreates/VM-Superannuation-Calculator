@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future Money — Super Calculator</title>
+<meta name="description" content="An Australian superannuation calculator for VCE VM Numeracy students. Discover how compound interest grows your super.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,700;1,9..144,900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --cream: #FBF3E0;
+  --paper: #FFF8EC;
+  --ink: #181613;
+  --ink-soft: #5A554D;
+  --hot: #E8421F;
+  --pop: #FFC629;
+  --cool: #1F6149;
+  --line: #181613;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.55;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(24,22,19,0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 22px 64px; }
+
+/* ===== HERO ===== */
+.hero {
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 22px;
+  margin-bottom: 36px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px 24px;
+  align-items: end;
+}
+.hero-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6px 12px;
+  display: inline-block;
+  align-self: start;
+  grid-column: 1 / -1;
+  width: fit-content;
+}
+h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 900;
+  font-size: clamp(48px, 11vw, 124px);
+  line-height: 0.88;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+h1 em {
+  color: var(--hot);
+  font-style: italic;
+  font-weight: 900;
+}
+.hero-meta {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: right;
+  align-self: end;
+}
+.hero-meta strong { color: var(--ink); display: block; }
+
+/* ===== SECTIONS ===== */
+section { margin-bottom: 36px; }
+.kicker {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kicker::before {
+  content: "";
+  width: 24px;
+  height: 2px;
+  background: var(--hot);
+  display: inline-block;
+}
+h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+
+/* ===== PRESETS ===== */
+.presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.preset {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 16px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+}
+.preset:hover {
+  background: var(--pop);
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.preset:active { transform: translate(0, 0); box-shadow: 0 0 0 var(--ink); }
+.preset.active { background: var(--hot); color: var(--paper); }
+.preset-name { font-weight: 700; font-size: 16px; line-height: 1.2; margin-bottom: 6px; }
+.preset-meta { font-size: 12px; opacity: 0.75; font-variant-numeric: tabular-nums; }
+
+/* ===== INPUT PANEL ===== */
+.panel {
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  padding: 28px;
+}
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px 28px;
+}
+.control label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.control label .v {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--ink);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--hot);
+  border: 3px solid var(--ink);
+  cursor: grab;
+}
+input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.1); }
+input[type="range"]::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--hot);
+  border: 3px solid var(--ink);
+  cursor: grab;
+}
+
+/* ===== BIG RESULT ===== */
+.result {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 36px 28px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.result::before, .result::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: var(--hot);
+  opacity: 0.18;
+  filter: blur(40px);
+}
+.result::before { top: -80px; left: -80px; }
+.result::after { bottom: -80px; right: -80px; background: var(--pop); }
+.result-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: var(--pop);
+  margin-bottom: 10px;
+  position: relative;
+}
+.big-number {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(64px, 16vw, 168px);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  margin-bottom: 8px;
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+.result-sub {
+  font-size: 14px;
+  color: rgba(251, 243, 224, 0.7);
+  position: relative;
+  font-weight: 500;
+}
+.result-sub strong { color: var(--paper); }
+
+/* ===== BREAKDOWN ===== */
+.breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-top: 0;
+}
+.brk-cell {
+  padding: 22px 24px;
+  border-right: 2px solid var(--ink);
+}
+.brk-cell:last-child { border-right: 0; background: var(--pop); }
+.brk-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+.brk-cell:last-child .brk-label { color: var(--ink); }
+.brk-value {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.brk-detail { font-size: 12px; margin-top: 4px; color: var(--ink-soft); }
+.brk-cell:last-child .brk-detail { color: var(--ink); font-weight: 500; }
+
+/* Stacked proportion bar */
+.proportion {
+  height: 16px;
+  display: flex;
+  margin-top: 18px;
+  border: 2px solid var(--ink);
+}
+.prop-contrib { background: var(--paper); border-right: 2px solid var(--ink); transition: flex-basis 0.4s ease; }
+.prop-growth { background: var(--pop); transition: flex-basis 0.4s ease; }
+.prop-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.prop-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.prop-legend i {
+  width: 12px; height: 12px;
+  border: 1.5px solid var(--ink);
+  display: inline-block;
+}
+.prop-legend i.contrib { background: var(--paper); }
+.prop-legend i.growth { background: var(--pop); }
+
+/* ===== CHART ===== */
+.chart-wrap {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 18px 16px 8px;
+  position: relative;
+  height: 340px;
+}
+
+/* ===== WHAT-IF CARDS ===== */
+.whatif {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.wif {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 18px 20px;
+  position: relative;
+}
+.wif-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.wif-headline {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.wif-headline.up { color: var(--cool); }
+.wif-headline.down { color: var(--hot); }
+.wif-explain { font-size: 13px; color: var(--ink-soft); }
+.wif::before {
+  content: attr(data-arrow);
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 22px;
+}
+.wif.up::before { color: var(--cool); }
+.wif.down::before { color: var(--hot); }
+
+/* ===== MATHS DETAIL ===== */
+.maths {
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  padding: 0;
+  overflow: hidden;
+}
+.maths summary {
+  padding: 18px 24px;
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 22px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.maths summary::-webkit-details-marker { display: none; }
+.maths summary::after {
+  content: "+";
+  font-size: 32px;
+  font-weight: 500;
+  transition: transform 0.2s;
+  line-height: 1;
+}
+.maths[open] summary::after { transform: rotate(45deg); }
+.maths-body { padding: 6px 24px 24px; border-top: 1.5px dashed var(--ink); }
+.formula {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  margin: 18px 0;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+.formula b { color: var(--pop); font-weight: 400; }
+.example {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.example .step { padding: 4px 0; border-bottom: 1px dotted rgba(24,22,19,0.2); }
+.example .step:last-child { border: 0; }
+.example .ans { font-weight: 700; color: var(--hot); font-variant-numeric: tabular-nums; }
+.maths p { margin: 10px 0; font-size: 14px; }
+.maths ul { margin: 10px 0 10px 22px; font-size: 14px; }
+.maths li { margin: 4px 0; }
+
+/* ===== FOOTER ===== */
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1.5px dashed var(--ink);
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+footer strong { color: var(--ink); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .breakdown { grid-template-columns: 1fr; }
+  .brk-cell { border-right: 0; border-bottom: 2px solid var(--ink); }
+  .brk-cell:last-child { border-bottom: 0; }
+  .hero { grid-template-columns: 1fr; }
+  .hero-meta { text-align: left; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); color: var(--pop); }
+  100% { transform: scale(1); }
+}
+.big-number.pop { animation: pop 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================ HERO ================ -->
+  <header class="hero">
+    <span class="hero-tag">VCE VM Numeracy · Financial Mathematics</span>
+    <h1>Your <em>future<br>money</em></h1>
+    <div class="hero-meta">
+      <strong>Super Calculator</strong>
+      What 12% adds up to
+    </div>
+  </header>
+
+  <!-- ================ PRESETS ================ -->
+  <section>
+    <p class="kicker">Pick a starting point</p>
+    <h2>Who are you in 2026?</h2>
+    <div class="presets" id="presets">
+      <button class="preset" data-age="18" data-salary="48000">
+        <div class="preset-name">Apprentice tradie</div>
+        <div class="preset-meta">$48,000 · age 18</div>
+      </button>
+      <button class="preset" data-age="18" data-salary="55000">
+        <div class="preset-name">Hospo full-time</div>
+        <div class="preset-meta">$55,000 · age 18</div>
+      </button>
+      <button class="preset" data-age="19" data-salary="58000">
+        <div class="preset-name">Retail or admin</div>
+        <div class="preset-meta">$58,000 · age 19</div>
+      </button>
+      <button class="preset" data-age="22" data-salary="85000">
+        <div class="preset-name">Qualified tradie</div>
+        <div class="preset-meta">$85,000 · age 22</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- ================ INPUTS ================ -->
+  <section>
+    <p class="kicker">Adjust the numbers</p>
+    <h2>Or build your own.</h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="control">
+          <label>Starting age <span class="v" id="age-out">18</span></label>
+          <input type="range" id="age" min="16" max="40" step="1" value="18">
+        </div>
+        <div class="control">
+          <label>Annual salary <span class="v" id="salary-out">$48,000</span></label>
+          <input type="range" id="salary" min="20000" max="150000" step="1000" value="48000">
+        </div>
+        <div class="control">
+          <label>Retire at age <span class="v" id="retire-out">67</span></label>
+          <input type="range" id="retire" min="60" max="75" step="1" value="67">
+        </div>
+        <div class="control">
+          <label>Investment return <span class="v" id="return-out">7.0%</span></label>
+          <input type="range" id="return" min="3" max="10" step="0.1" value="7">
+        </div>
+        <div class="control">
+          <label>Pay rise per year <span class="v" id="wage-out">3.0%</span></label>
+          <input type="range" id="wage" min="0" max="6" step="0.1" value="3">
+        </div>
+        <div class="control">
+          <label>Extra you add per week <span class="v" id="extra-out">$0</span></label>
+          <input type="range" id="extra" min="0" max="200" step="5" value="0">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================ BIG RESULT ================ -->
+  <section>
+    <div class="result">
+      <p class="result-label">Super at retirement</p>
+      <div class="big-number" id="big-number">$1,200,000</div>
+      <p class="result-sub">Working <strong id="years-working">49 years</strong> with a <strong>12% super guarantee</strong></p>
+    </div>
+
+    <div class="breakdown">
+      <div class="brk-cell">
+        <p class="brk-label">What your boss put in</p>
+        <p class="brk-value" id="contrib-total">$0</p>
+        <p class="brk-detail" id="contrib-pct">—</p>
+      </div>
+      <div class="brk-cell">
+        <p class="brk-label">What compound interest added</p>
+        <p class="brk-value" id="growth-total">$0</p>
+        <p class="brk-detail" id="growth-pct">—</p>
+      </div>
+    </div>
+
+    <div class="proportion" id="proportion">
+      <div class="prop-contrib" id="prop-contrib" style="flex-basis: 50%"></div>
+      <div class="prop-growth" id="prop-growth" style="flex-basis: 50%"></div>
+    </div>
+    <div class="prop-legend">
+      <span><i class="contrib"></i>Money in</span>
+      <span><i class="growth"></i>Investment growth</span>
+    </div>
+  </section>
+
+  <!-- ================ CHART ================ -->
+  <section>
+    <p class="kicker">Year by year</p>
+    <h2>Watch it snowball.</h2>
+    <div class="chart-wrap">
+      <canvas id="chart" role="img" aria-label="Line chart showing super balance growth from starting age to retirement age">Super balance growth chart</canvas>
+    </div>
+  </section>
+
+  <!-- ================ WHAT-IF CARDS ================ -->
+  <section>
+    <p class="kicker">What if?</p>
+    <h2>Small changes, big difference.</h2>
+    <div class="whatif" id="whatif">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- ================ MATHS ================ -->
+  <details class="maths">
+    <summary>Show me the maths</summary>
+    <div class="maths-body">
+      <p>Each year your super balance does two things: <b>grows</b> from investment returns, and <b>increases</b> from your boss's contribution. Then it does it all again next year. That's compound interest.</p>
+
+      <div class="formula">
+        new balance = old balance &times; (1 + <b>r</b>) + 0.85 &times; <b>SG</b> &times; salary<br>
+        new salary &nbsp; = old salary &times; (1 + <b>g</b>)
+      </div>
+
+      <p><strong>What the letters mean:</strong></p>
+      <ul>
+        <li><b>r</b> = investment return (we're using 7% — long-run average for a balanced super fund)</li>
+        <li><b>SG</b> = super guarantee, which is 12% of your salary in 2026</li>
+        <li><b>g</b> = how much your salary grows each year (we're using 3%)</li>
+        <li><b>0.85</b> means 85% — the government takes 15% tax off super contributions on the way in</li>
+      </ul>
+
+      <p><strong>Worked example — first year on $48,000:</strong></p>
+      <div class="example">
+        <div class="step">Boss puts in: 12% × $48,000 = <span class="ans">$5,760</span></div>
+        <div class="step">After 15% tax: 0.85 × $5,760 = <span class="ans">$4,896</span> lands in super</div>
+        <div class="step">Investment growth on $0 starting balance: <span class="ans">$0</span></div>
+        <div class="step">End of year 1 balance: <span class="ans">$4,896</span></div>
+        <div class="step">Year 2 starts with: $4,896 × 1.07 + new contribution…</div>
+      </div>
+
+      <p><strong>The lesson:</strong> The formula doesn't change. But because each year builds on the last, the gap between starting at 18 vs starting at 25 is enormous — that's the power of time on compound interest.</p>
+    </div>
+  </details>
+
+  <footer>
+    Built for <strong>VCE VM Numeracy</strong> · This is an educational tool, not financial advice. Real super outcomes vary based on fees, insurance premiums, fund performance, and individual contributions.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const fmtMoney = n => {
+    if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+    if (Math.abs(n) >= 1e3) return '$' + Math.round(n/1000) + 'K';
+    return '$' + Math.round(n).toLocaleString();
+  };
+  const fmtFull = n => '$' + Math.round(n).toLocaleString();
+  const fmtPct = n => Number(n).toFixed(1) + '%';
+
+  // ---------- inputs ----------
+  const inputs = {
+    age:    $('age'),
+    salary: $('salary'),
+    retire: $('retire'),
+    ret:    $('return'),
+    wage:   $('wage'),
+    extra:  $('extra')
+  };
+
+  // ---------- core projection ----------
+  // Returns {ages, balances, totalContrib, totalGrowth, finalBalance}
+  function project(age, salary, retire, retPct, wagePct, extraWeek) {
+    const r = retPct / 100;
+    const g = wagePct / 100;
+    const SG = 0.12;
+    const taxFactor = 0.85;
+    let balance = 0;
+    let s = salary;
+    let totalContrib = 0;
+    const ages = [age];
+    const balances = [0];
+    const years = Math.max(0, retire - age);
+
+    for (let i = 1; i <= years; i++) {
+      const employer = taxFactor * SG * s;
+      const extra = extraWeek * 52; // after-tax personal contributions ignore the 15% tax for simplicity
+      const annualIn = employer + extra;
+      balance = balance * (1 + r) + annualIn;
+      totalContrib += annualIn;
+      s = s * (1 + g);
+      ages.push(age + i);
+      balances.push(balance);
+    }
+    return {
+      ages,
+      balances,
+      totalContrib,
+      totalGrowth: balance - totalContrib,
+      finalBalance: balance,
+      years
+    };
+  }
+
+  // ---------- chart ----------
+  let chart;
+  function initChart() {
+    const ctx = $('chart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [{
+        label: 'Balance',
+        data: [],
+        borderColor: '#181613',
+        backgroundColor: 'rgba(232, 66, 31, 0.18)',
+        borderWidth: 3,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#E8421F',
+        pointHoverBorderColor: '#181613',
+        pointHoverBorderWidth: 2,
+        tension: 0.3
+      }]},
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#181613',
+            titleColor: '#FFC629',
+            bodyColor: '#FBF3E0',
+            titleFont: { family: 'DM Sans', weight: '700' },
+            bodyFont: { family: 'DM Sans' },
+            padding: 12,
+            cornerRadius: 0,
+            borderColor: '#FFC629',
+            borderWidth: 1,
+            displayColors: false,
+            callbacks: {
+              title: ctx => 'Age ' + ctx[0].label,
+              label: ctx => 'Balance: ' + fmtFull(ctx.parsed.y)
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(24,22,19,0.06)' },
+            ticks: { color: '#5A554D', font: { family: 'DM Sans', size: 11 } },
+            title: { display: true, text: 'AGE', color: '#5A554D', font: { family: 'DM Sans', size: 11, weight: '700' }}
+          },
+          y: {
+            grid: { color: 'rgba(24,22,19,0.06)' },
+            ticks: {
+              color: '#5A554D',
+              font: { family: 'DM Sans', size: 11 },
+              callback: v => fmtMoney(v)
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ---------- what-if cards ----------
+  function buildWhatIfs(base) {
+    const baseFinal = base.finalBalance;
+    const args = [+inputs.age.value, +inputs.salary.value, +inputs.retire.value, +inputs.ret.value, +inputs.wage.value, +inputs.extra.value];
+
+    const scenarios = [
+      {
+        label: 'Started 5 years later',
+        delta: project(args[0]+5, args[1], args[2], args[3], args[4], args[5]).finalBalance - baseFinal,
+        explain: 'Five fewer years of compounding can cost a serious chunk.'
+      },
+      {
+        label: 'Worked until 70',
+        delta: project(args[0], args[1], 70, args[3], args[4], args[5]).finalBalance - baseFinal,
+        explain: 'Three more years means three more compounding cycles.'
+      },
+      {
+        label: 'Earned 20% more',
+        delta: project(args[0], args[1]*1.2, args[2], args[3], args[4], args[5]).finalBalance - baseFinal,
+        explain: 'Higher salary = bigger contributions every year.'
+      },
+      {
+        label: 'Added $20/week extra',
+        delta: project(args[0], args[1], args[2], args[3], args[4], args[5]+20).finalBalance - baseFinal,
+        explain: 'Voluntary contributions stack on top of your boss\'s 12%.'
+      }
+    ];
+
+    const container = $('whatif');
+    container.innerHTML = scenarios.map(s => {
+      const up = s.delta >= 0;
+      const arrow = up ? '↗' : '↘';
+      const cls = up ? 'up' : 'down';
+      const sign = up ? '+' : '−';
+      return `
+        <div class="wif ${cls}" data-arrow="${arrow}">
+          <div class="wif-label">${s.label}</div>
+          <div class="wif-headline ${cls}">${sign}${fmtMoney(Math.abs(s.delta))}</div>
+          <div class="wif-explain">${s.explain}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------- update everything ----------
+  let lastValue = 0;
+  function update(animate = false) {
+    const age    = +inputs.age.value;
+    const salary = +inputs.salary.value;
+    const retire = Math.max(age + 1, +inputs.retire.value);
+    if (retire !== +inputs.retire.value) inputs.retire.value = retire;
+    const ret    = +inputs.ret.value;
+    const wage   = +inputs.wage.value;
+    const extra  = +inputs.extra.value;
+
+    // labels
+    $('age-out').textContent = age;
+    $('retire-out').textContent = retire;
+    $('salary-out').textContent = fmtFull(salary);
+    $('return-out').textContent = fmtPct(ret);
+    $('wage-out').textContent = fmtPct(wage);
+    $('extra-out').textContent = '$' + extra;
+    $('years-working').textContent = (retire - age) + ' years';
+
+    // project
+    const p = project(age, salary, retire, ret, wage, extra);
+
+    // result
+    $('big-number').textContent = fmtFull(p.finalBalance);
+    if (animate && Math.abs(p.finalBalance - lastValue) > 1000) {
+      $('big-number').classList.remove('pop');
+      void $('big-number').offsetWidth;
+      $('big-number').classList.add('pop');
+    }
+    lastValue = p.finalBalance;
+
+    // breakdown
+    $('contrib-total').textContent = fmtFull(p.totalContrib);
+    $('growth-total').textContent = fmtFull(p.totalGrowth);
+    const tot = p.finalBalance || 1;
+    const cPct = (p.totalContrib / tot) * 100;
+    const gPct = (p.totalGrowth / tot) * 100;
+    $('contrib-pct').textContent = cPct.toFixed(0) + '% of your final balance';
+    $('growth-pct').textContent = gPct.toFixed(0) + '% of your final balance';
+    $('prop-contrib').style.flexBasis = cPct + '%';
+    $('prop-growth').style.flexBasis = gPct + '%';
+
+    // chart
+    chart.data.labels = p.ages;
+    chart.data.datasets[0].data = p.balances;
+    chart.update('none');
+
+    // what-if cards
+    buildWhatIfs(p);
+  }
+
+  // ---------- preset buttons ----------
+  document.querySelectorAll('.preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      inputs.age.value = btn.dataset.age;
+      inputs.salary.value = btn.dataset.salary;
+      update(true);
+    });
+  });
+
+  // ---------- input listeners ----------
+  Object.values(inputs).forEach(inp => {
+    inp.addEventListener('input', () => {
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+      update();
+    });
+  });
+
+  // ---------- init ----------
+  initChart();
+  document.querySelector('.preset').classList.add('active');
+  update(true);
+})();
+</script>
+
+</body>
+</html>
